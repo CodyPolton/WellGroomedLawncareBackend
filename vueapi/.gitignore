@@ -1,0 +1,13 @@
+frontend/node_modules/
+venv/
+.DS_Store
+/node_modules
+.vscode
+*.pyc
+*.log
+backend/backend-framework/framework/__pycache__
+backend/backend-framework/vueapi/log.log
+# Elastic Beanstalk Files
+.elasticbeanstalk/*
+!.elasticbeanstalk/*.cfg.yml
+!.elasticbeanstalk/*.global.yml
