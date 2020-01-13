@@ -25,7 +25,8 @@ SECRET_KEY = '#_)^-_#cvc8hi+^w0m1pwstsefi7y$#0((fq4oy$4r9wtht(&6'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['backend-prod.8t73xwp3hr.us-east-2.elasticbeanstalk.com']
+# 'backend-prod.8t73xwp3hr.us-east-2.elasticbeanstalk.com'
+ALLOWED_HOSTS = []
 
 
 # Application definition
@@ -95,6 +96,9 @@ CORS_ORIGIN_ALLOW_ALL=True
 
 
 
+
+
+
 # Password validation
 # https://docs.djangoproject.com/en/3.0/ref/settings/#auth-password-validators
 
@@ -131,28 +135,35 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/3.0/howto/static-files/
 
-USE_S3 = os.getenv('USE_S3') == 'TRUE'
+AWS_ACCESS_KEY_ID = 'AKIAZGQ5Y6VBANCPC365'
+AWS_SECRET_ACCESS_KEY = '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'
+DEFAULT_FILE_STORAGE = 'storages.backends.s3boto3.S3Boto3Storage'
+AWS_STORAGE_BUCKET_NAME = 'elasticbeanstalk-us-east-2-632496387394'
+AWS_S3_REGION_NAME = 'us-east-1'
+
+USE_S3 = 'TRUE'
 
 if USE_S3:
     # aws settings
-    AWS_ACCESS_KEY_ID = os.getenv('AWS_ACCESS_KEY_ID')
-    AWS_SECRET_ACCESS_KEY = os.getenv('AWS_SECRET_ACCESS_KEY')
-    AWS_STORAGE_BUCKET_NAME = os.getenv('AWS_STORAGE_BUCKET_NAME')
+    AWS_ACCESS_KEY_ID = 'AKIAZGQ5Y6VBANCPC365'
+    AWS_SECRET_ACCESS_KEY = '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'
+    AWS_STORAGE_BUCKET_NAME = 'elasticbeanstalk-us-east-2-632496387394'
     AWS_DEFAULT_ACL = 'public-read'
     AWS_S3_CUSTOM_DOMAIN = f'{AWS_STORAGE_BUCKET_NAME}.s3.amazonaws.com'
     AWS_S3_OBJECT_PARAMETERS = {'CacheControl': 'max-age=86400'}
     # s3 static settings
     AWS_LOCATION = 'static'
     STATIC_URL = f'https://{AWS_S3_CUSTOM_DOMAIN}/{AWS_LOCATION}/'
-    STATICFILES_STORAGE = 'storages.backends.s3boto3.S3Boto3Storage'
+    STATICFILES_STORAGE = 'vueapi.storage_backends.StaticStorage'
+    # s3 public media settings
+    PUBLIC_MEDIA_LOCATION = 'media'
+    MEDIA_URL = f'https://{AWS_S3_CUSTOM_DOMAIN}/{PUBLIC_MEDIA_LOCATION}/'
+    DEFAULT_FILE_STORAGE = 'vueapi.storage_backends.PublicMediaStorage'
 else:
     STATIC_URL = '/staticfiles/'
     STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 
-STATICFILES_DIRS = (os.path.join(BASE_DIR, 'static'),)
 
-MEDIA_URL = '/mediafiles/'
-MEDIA_ROOT = os.path.join(BASE_DIR, 'mediafiles')
 
 
 LOGGING = {

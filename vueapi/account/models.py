@@ -83,5 +83,15 @@ class JobExpense(models.Model):
         ordering = ['job_expenseid']
 
 
+class Invoice(models.Model):
+    invoiceid = models.AutoField(primary_key=True)
+    total_price = models.DecimalField(max_digits=10, decimal_places=2, null =True)
+    paid = models.BooleanField(default = False)
+    name = models.CharField(max_length=255, blank = True)
+    invoice = models.FileField()
+    date_created = models.DateTimeField(auto_now_add=True, blank=True)
+    date_updated = models.DateTimeField(auto_now=True, blank=True)
+
+
 
 
