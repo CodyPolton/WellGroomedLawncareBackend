@@ -74,7 +74,6 @@ class JobExpense(models.Model):
     description = models.TextField(blank=True)
     job_expense_type = models.CharField(max_length=255)
     cost = models.DecimalField(max_digits=10, decimal_places=2)
-    date_purchased = models.DateField(blank=True)
     date_created = models.DateTimeField(auto_now_add=True, blank=True)
     date_updated = models.DateTimeField(auto_now=True, blank=True)
 

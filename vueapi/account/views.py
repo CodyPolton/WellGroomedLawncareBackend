@@ -6,10 +6,12 @@ from django.core.files.storage import FileSystemStorage
 import boto3
 from botocore.client import Config
 import os
-from .models import Yard, Job, JobExpense, Invoice
+from .models import Yard, Job, JobExpense, Invoice, Account
 from .serializers import YardSerializer, JobSerializer, JobExpenseSerializer
 import logging
 from datetime import datetime
+from mailmerge import MailMerge
+from datetime import date
 
 logger = logging.getLogger(__name__)
 
@@ -105,8 +107,97 @@ class uploadFile(APIView):
 class GenerateInvoice(APIView):
 
     def post(self, request):
-        print(request.POST.getlist('selected'))
+        template = "InvoiceTemplate.docx"
+        document = MailMerge(template)
+        jobs_history = []
+        print(request.data)
+        jobs = request.data['jobs']
+        yard = None
+        account = None
+        
+        
+        total = 0
+        for x in jobs:
+            if yard is None:
+                for yards in Yard.objects.filter(yardid = x['yard']).values():
+                    yard = yards
+                    for accounts in Account.objects.filter(accountid = yard['account_id']).values():
+                        account = accounts
+            
+        #     entry_list = list(JobExpense.objects.filter(job= x['jobid']).values())
+        #     for e in entry_list:
+        #         total += e['cost']
+        #         job = {
+        #             'Qty': '1',
+        #             'JobAddress': '',
+        #             'Description': e['name'],
+        #             'UPrice': str(e['cost']),
+        #             'LinePrice': str(e['cost'])
+        #         }
+        #         jobs_history.append(job)
+
+
+        # print(jobs_history)
+        # document.merge(
+        #     BillingName = "Cody Polton",
+        #     BillingAddress = "810 Cambridge Dr.",
+        #     BillingJob = "Mowing",
+
+        #     AccountName = "CodyPolton",
+
+        #     Date='{:%m-%d-%Y}'.format(date.today()),
+        #     InvoiceId = '101',
+
+        #     SubTotal = str(total),
+        #     Total = str(total)
+
+        # )
+        # document.merge_rows('Qty', jobs_history)
+
+
+        # document.write('Invoices/test-output.docx')
         return Response({'message': "Printed"})
         
+
+
+
+# template = "InvoiceTemplate.docx"
+# document = MailMerge(template)
+# print(document.get_merge_fields())
+
+# jobs_history = [{
+
+#     'Qty': "1",
+#     'JobAddress': '810 Cambridge Dr.',
+#     'Description': "Mowing",
+#     'UPrice': '70.00',
+#     'LinePrice': '70.00'
+# },{
+#     'Qty': "12",
+#     'JobAddress': '810 Cambridge Dr.',
+#     'Description': "Mowing x2asdfas df f asd fasd f asd f asdf asd f asdf asdf das f sdaf sd",
+#     'UPrice': '70.00',
+#     'LinePrice': '140.00'
+# }
+# ]
+
+# document.merge(
+#     BillingName = "Cody Polton",
+#     BillingAddress = "810 Cambridge Dr.",
+#     BillingJob = "Mowing",
+
+#     AccountName = "CodyPolton",
+
+#     Date='{:%m-%d-%Y}'.format(date.today()),
+#     InvoiceId = '101',
+
+#     SubTotal = '$210.00',
+#     Total = '$210.00'
+
+# )
+# document.merge_rows('Qty', jobs_history)
+
+
+# document.write('Invoices/test-output.docx')
 
 
