@@ -6,9 +6,10 @@ from django.core.files.storage import FileSystemStorage
 import boto3
 from botocore.client import Config
 import os
-from .models import Yard, Job, JobExpense, Invoice, Account
+from .models import Yard, Job, JobExpense, Invoice, InvoiceManager, Account
 from .serializers import YardSerializer, JobSerializer, JobExpenseSerializer
 import logging
+from botocore.exceptions import ClientError
 from datetime import datetime
 from mailmerge import MailMerge
 from datetime import date
@@ -110,94 +111,119 @@ class GenerateInvoice(APIView):
         template = "InvoiceTemplate.docx"
         document = MailMerge(template)
         jobs_history = []
-        print(request.data)
         jobs = request.data['jobs']
         yard = None
         account = None
-        
+        accountName = None
         
         total = 0
+        invoiceName = 'temp'
         for x in jobs:
             if yard is None:
-                for yards in Yard.objects.filter(yardid = x['yard']).values():
-                    yard = yards
-                    for accounts in Account.objects.filter(accountid = yard['account_id']).values():
-                        account = accounts
+                yard = Yard.objects.get(pk= x['yard'])    #filter(yardid = x['yard']).values():
+                account = Account.objects.get(pk = yard.account_id)                # filter(accountid = yard['account_id']).values():
+
+                accountName = account.f_name + " " + account.l_name
             
-        #     entry_list = list(JobExpense.objects.filter(job= x['jobid']).values())
-        #     for e in entry_list:
-        #         total += e['cost']
-        #         job = {
-        #             'Qty': '1',
-        #             'JobAddress': '',
-        #             'Description': e['name'],
-        #             'UPrice': str(e['cost']),
-        #             'LinePrice': str(e['cost'])
-        #         }
-        #         jobs_history.append(job)
+            entry_list = list(JobExpense.objects.filter(job= x['jobid']).values())
+            for e in entry_list:
+                total += e['cost']
+                job = {
+                    'Qty': '1',
+                    'JobAddress': account.address,
+                    'Description': e['name'],
+                    'UPrice': str(e['cost']),
+                    'LinePrice': str(e['cost'])
+                }
+                jobs_history.append(job)
+
+        
+        invoice = Invoice.objects.create_invoice(invoiceName, total, account)
+        invoiceName = account.l_name + '_' + account.f_name +  '-' + 'InvoiceID_' + str(invoice.invoiceid) + '.docx'
+        invoice.invoice_name = invoiceName
+        invoice.save()
+
+        document.merge(
+            BillingName = accountName,
+            BillingAddress = account.address + '\n' + account.city + ', ' + account.state + ', ' + str(account.zip_code),
+            BillingJob = "Mowing",
+
+            AccountName = accountName,
+
+            Date='{:%m-%d-%Y}'.format(date.today()),
+            InvoiceId = str(invoice.invoiceid),
+
+            SubTotal = str(total),
+            Total = str(total)
+
+        )
+        document.merge_rows('Qty', jobs_history)
 
 
-        # print(jobs_history)
-        # document.merge(
-        #     BillingName = "Cody Polton",
-        #     BillingAddress = "810 Cambridge Dr.",
-        #     BillingJob = "Mowing",
+        document.write('Invoices/' +  invoiceName)
 
-        #     AccountName = "CodyPolton",
+        self.UploadInvoice(invoiceName)
 
-        #     Date='{:%m-%d-%Y}'.format(date.today()),
-        #     InvoiceId = '101',
-
-        #     SubTotal = str(total),
-        #     Total = str(total)
-
-        # )
-        # document.merge_rows('Qty', jobs_history)
-
-
-        # document.write('Invoices/test-output.docx')
+        for x in jobs:
+            job = Job.objects.get(pk = x['jobid'])
+            job.invoiceid = invoice.invoiceid
+            job.invoiced = True
+            job.save()
         return Response({'message': "Printed"})
         
+    
+    def UploadInvoice(self, invoiceName):
+        
+       
+        ACCESS_KEY_ID = 'AKIAZGQ5Y6VBANCPC365'
+        ACCESS_SECRET_KEY = '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'
+        BUCKET_NAME = 'elasticbeanstalk-us-east-2-632496387394'
+        FILE_NAME = 'Invoices/' + invoiceName
 
 
+        data = open(FILE_NAME, 'rb')
 
-# template = "InvoiceTemplate.docx"
-# document = MailMerge(template)
-# print(document.get_merge_fields())
+        # S3 Connect
+        s3_client = boto3.client('s3',aws_access_key_id=ACCESS_KEY_ID,
+            aws_secret_access_key=ACCESS_SECRET_KEY,)
+        try:
+            response = s3_client.upload_file(FILE_NAME, BUCKET_NAME, str(FILE_NAME), ExtraArgs={'ACL':'public-read'})
+            
+            print("success")
+        except ClientError as e:
+            logging.error(e)
+            
 
-# jobs_history = [{
+class OverideInvoice(APIView):
 
-#     'Qty': "1",
-#     'JobAddress': '810 Cambridge Dr.',
-#     'Description': "Mowing",
-#     'UPrice': '70.00',
-#     'LinePrice': '70.00'
-# },{
-#     'Qty': "12",
-#     'JobAddress': '810 Cambridge Dr.',
-#     'Description': "Mowing x2asdfas df f asd fasd f asd f asdf asd f asdf asdf das f sdaf sd",
-#     'UPrice': '70.00',
-#     'LinePrice': '140.00'
-# }
-# ]
+    def post(self, request):
+        file = request.POST.get('file')
+        print(file)
+        file_name = request.POST.get('file_name')
+        print(file_name)
 
-# document.merge(
-#     BillingName = "Cody Polton",
-#     BillingAddress = "810 Cambridge Dr.",
-#     BillingJob = "Mowing",
-
-#     AccountName = "CodyPolton",
-
-#     Date='{:%m-%d-%Y}'.format(date.today()),
-#     InvoiceId = '101',
-
-#     SubTotal = '$210.00',
-#     Total = '$210.00'
-
-# )
-# document.merge_rows('Qty', jobs_history)
+        
+        ACCESS_KEY_ID = 'AKIAZGQ5Y6VBANCPC365'
+        ACCESS_SECRET_KEY = '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'
+        BUCKET_NAME = 'elasticbeanstalk-us-east-2-632496387394'
+        FILE_NAME = 'Invoices/' + file_name
 
 
-# document.write('Invoices/test-output.docx')
+        data = open(FILE_NAME, 'rb')
+
+        # S3 Connect
+        s3_client = boto3.client('s3',aws_access_key_id=ACCESS_KEY_ID,
+            aws_secret_access_key=ACCESS_SECRET_KEY,)
+        try:
+            response = s3_client.upload_file(file, BUCKET_NAME, str(FILE_NAME), ExtraArgs={'ACL':'public-read'})
+            
+            print("success")
+        except ClientError as e:
+            logging.error(e)
+
+        return Response({'message': "Uploaded"})
+
+    
+
 
 
