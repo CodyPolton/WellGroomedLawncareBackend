@@ -12,6 +12,7 @@ import logging
 from botocore.exceptions import ClientError
 from datetime import datetime
 from mailmerge import MailMerge
+from django.core.files.storage import default_storage
 from datetime import date
 
 logger = logging.getLogger(__name__)
@@ -197,25 +198,25 @@ class GenerateInvoice(APIView):
 class OverideInvoice(APIView):
 
     def post(self, request):
-        file = request.POST.get('file')
-        print(file)
-        file_name = request.POST.get('file_name')
-        print(file_name)
+        print(request.FILES['file'])
+        files = request.data['file']
+        print(files.name)
+        file_name = default_storage.save('Invoices/' + files.name, files)
 
         
         ACCESS_KEY_ID = 'AKIAZGQ5Y6VBANCPC365'
         ACCESS_SECRET_KEY = '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'
         BUCKET_NAME = 'elasticbeanstalk-us-east-2-632496387394'
-        FILE_NAME = 'Invoices/' + file_name
+        FILE_NAME = 'Invoices/' + files.name
 
 
-        data = open(FILE_NAME, 'rb')
+        
 
         # S3 Connect
         s3_client = boto3.client('s3',aws_access_key_id=ACCESS_KEY_ID,
             aws_secret_access_key=ACCESS_SECRET_KEY,)
         try:
-            response = s3_client.upload_file(file, BUCKET_NAME, str(FILE_NAME), ExtraArgs={'ACL':'public-read'})
+            response = s3_client.upload_file(files, BUCKET_NAME, str(FILE_NAME), ExtraArgs={'ACL':'public-read'})
             
             print("success")
         except ClientError as e:

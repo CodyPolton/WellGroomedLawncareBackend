@@ -149,7 +149,7 @@ if USE_S3:
     AWS_SECRET_ACCESS_KEY = '70tCdhTA6fDvXvPxJCN9afBlX1A8eCzKQX9sbHny'
     AWS_STORAGE_BUCKET_NAME = 'elasticbeanstalk-us-east-2-632496387394'
     AWS_DEFAULT_ACL = 'public-read'
-    AWS_S3_CUSTOM_DOMAIN = f'{AWS_STORAGE_BUCKET_NAME}.s3.amazonaws.com'
+    AWS_S3_CUSTOM_DOMAIN = f'{AWS_STORAGE_BUCKET_NAME}.s3-website.us-east-2.amazonaws.com'
     AWS_S3_OBJECT_PARAMETERS = {'CacheControl': 'max-age=86400'}
     # s3 static settings
     AWS_LOCATION = 'static'
