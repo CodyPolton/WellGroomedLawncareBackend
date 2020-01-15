@@ -20,6 +20,7 @@ from .routers import router
 from account import views
 
 
+
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('api/', include(router.urls)),
@@ -29,5 +30,8 @@ urlpatterns = [
     url('api/yardmowedcheck', views.YardMowedCheck.as_view()),
     url('api/upload', views.uploadFile.as_view()),
     url('api/generateinvoice', views.GenerateInvoice.as_view()),
-    url('api/overideinvoice', views.OverideInvoice.as_view())
+    url('api/overideinvoice', views.OverideInvoice.as_view()),
+    url('api/invoicejobs', views.InvoiceJobs.as_view())
 ]
+
+
