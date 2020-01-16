@@ -7,7 +7,7 @@ import boto3
 from botocore.client import Config
 import os
 from .models import Yard, Job, JobExpense, Invoice, InvoiceManager, Account
-from .serializers import YardSerializer, JobSerializer, JobExpenseSerializer
+from .serializers import YardSerializer, JobSerializer, JobExpenseSerializer, InvoiceSerializer
 import logging
 from botocore.exceptions import ClientError
 from datetime import datetime
@@ -201,6 +201,16 @@ class InvoiceJobs(APIView):
         else:
            return Response(serializer.data) 
     
+class AccountInvoices(APIView):
+    def get(self, request):
+        id = request.GET.get('id', '0')
+        invoices = Invoice.objects.filter(account=id)
+        logger.info(invoices)
+        serializer = InvoiceSerializer(invoices, many=True)
+        if invoices is None:
+            return Response({"message": "No invoices for id = " + id})
 
+        else:
+           return Response(serializer.data)
 
 

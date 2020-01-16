@@ -13,7 +13,7 @@ pip install -r requirements.txt
 cd backend-framework
 
 #Start django dev server
-django manage.py runserver
+python3 manage.py runserver
 
 ```
 

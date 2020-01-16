@@ -31,7 +31,8 @@ urlpatterns = [
     url('api/upload', views.uploadFile.as_view()),
     url('api/generateinvoice', views.GenerateInvoice.as_view()),
     url('api/overideinvoice', views.OverideInvoice.as_view()),
-    url('api/invoicejobs', views.InvoiceJobs.as_view())
+    url('api/invoicejobs', views.InvoiceJobs.as_view()),
+    url('api/accountinvoices', views.AccountInvoices.as_view())
 ]
 
 
