@@ -1,3 +1,4 @@
+from rest_framework import status
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from django.shortcuts import render
@@ -172,6 +173,7 @@ class GenerateInvoice(APIView):
         FILE_NAME = 'Invoices/' + invoiceName
         data = open(FILE_NAME, 'rb')
         file_name = default_storage.save(FILE_NAME, data)
+        os.remove(FILE_NAME )
 
        
             
@@ -187,6 +189,21 @@ class OverideInvoice(APIView):
         
 
         return Response({'message': "Uploaded"})
+
+class DeleteInvoice(APIView):
+
+    def get(self,request):
+        invoiceid = request.GET.get('invoiceid', '0')
+        invoice = Invoice.objects.get(pk=invoiceid)
+        print(invoice.invoiceid)
+        if invoice is not None:
+            default_storage.delete('Invoices/' + invoice.invoice_name)
+            invoice.delete()
+            content = {'message': 'Invoice successfully deleted'}
+            return Response(content, status=status.HTTP_200_OK)
+        else: 
+            content = {'message': 'Invoice not found in database with id of ' + invoiceid}
+            return Response(content, status=status.HTTP_404_NOT_FOUND)
 
 class InvoiceJobs(APIView):
 

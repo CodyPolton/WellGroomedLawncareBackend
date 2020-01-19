@@ -32,7 +32,9 @@ urlpatterns = [
     url('api/generateinvoice', views.GenerateInvoice.as_view()),
     url('api/overideinvoice', views.OverideInvoice.as_view()),
     url('api/invoicejobs', views.InvoiceJobs.as_view()),
-    url('api/accountinvoices', views.AccountInvoices.as_view())
+    url('api/accountinvoices', views.AccountInvoices.as_view()),
+    url('api/deleteinvoice', views.DeleteInvoice.as_view())
+
 ]
 
 
