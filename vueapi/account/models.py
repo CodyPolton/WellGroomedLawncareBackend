@@ -51,7 +51,8 @@ class Job(models.Model):
     job_type = models.CharField(max_length=255)
     date_completed = models.DateField(null=True)
     job_total = models.DecimalField( max_digits=10, decimal_places=2, null=True)
-    billed = models.BooleanField()
+    invoiced = models.BooleanField()
+    invoiceid = models.CharField(max_length=255, blank=True)
     date_created = models.DateTimeField(auto_now_add=True, blank=True)
     date_updated = models.DateTimeField(auto_now=True, blank=True)
 
@@ -74,13 +75,36 @@ class JobExpense(models.Model):
     description = models.TextField(blank=True)
     job_expense_type = models.CharField(max_length=255)
     cost = models.DecimalField(max_digits=10, decimal_places=2)
-    date_purchased = models.DateField(blank=True)
     date_created = models.DateTimeField(auto_now_add=True, blank=True)
     date_updated = models.DateTimeField(auto_now=True, blank=True)
 
     class Meta:
         db_table = 'job_expense'
         ordering = ['job_expenseid']
+
+class InvoiceManager(models.Manager):
+    def create_invoice(self, name, total, accountid):
+        invoice = self.create(invoice_name=name, total_price=total, account=accountid )
+        return invoice
+
+class Invoice(models.Model):
+    invoiceid = models.AutoField(primary_key=True)
+    account = models.ForeignKey('Account', on_delete=models.CASCADE)
+    total_price = models.DecimalField(max_digits=10, decimal_places=2)
+    invoice_name = models.CharField(max_length=255)
+    paid = models.BooleanField(default = False)
+    billed = models.BooleanField(default = False)
+    approved = models.BooleanField(default = False)
+    date_created = models.DateTimeField(auto_now_add=True, blank=True)
+    date_updated = models.DateTimeField(auto_now=True, blank=True)
+
+    objects = InvoiceManager()
+
+    class Meta:
+        db_table = 'invoices'
+        ordering = ['invoiceid']
+
+
 
 
 

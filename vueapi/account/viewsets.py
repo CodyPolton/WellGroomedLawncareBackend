@@ -1,6 +1,6 @@
 from rest_framework import viewsets
-from .models import Account, Yard, JobType, Job, JobExpenseType, JobExpense
-from .serializers import AccountSerializer, YardSerializer, JobTypeSerializer, JobSerializer, JobExpenseSerializer, JobExpenseTypeSerializer
+from .models import Account, Yard, JobType, Job, JobExpenseType, JobExpense, Invoice
+from .serializers import AccountSerializer, YardSerializer, JobTypeSerializer, JobSerializer, JobExpenseSerializer, JobExpenseTypeSerializer, InvoiceSerializer
 
 class AccountViewSet(viewsets.ModelViewSet):
     queryset = Account.objects.all()
@@ -28,3 +28,7 @@ class JobExpenseViewSet(viewsets.ModelViewSet):
 
     def patch(self, request, *args, **kwargs):
         return self.partial_update(request, *args, **kwargs)
+
+class InvoiceViewSet(viewsets.ModelViewSet):
+    queryset = Invoice.objects.all()
+    serializer_class = InvoiceSerializer

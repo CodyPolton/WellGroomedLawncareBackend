@@ -1,9 +1,20 @@
+from rest_framework import status
 from rest_framework.views import APIView
 from rest_framework.response import Response
-from .models import Yard, Job, JobExpense
-from .serializers import YardSerializer, JobSerializer, JobExpenseSerializer
+from django.shortcuts import render
+from django.conf import settings
+from django.core.files.storage import FileSystemStorage
+import boto3
+from botocore.client import Config
+import os
+from .models import Yard, Job, JobExpense, Invoice, InvoiceManager, Account
+from .serializers import YardSerializer, JobSerializer, JobExpenseSerializer, InvoiceSerializer
 import logging
+from botocore.exceptions import ClientError
 from datetime import datetime
+from mailmerge import MailMerge
+from django.core.files.storage import default_storage
+from datetime import date
 
 logger = logging.getLogger(__name__)
 
@@ -63,6 +74,160 @@ class YardMowedCheck(APIView):
                 return Response({'message': "Hasn't been mowed today"})
             else: 
                 return Response({'message': "Mowed today"})
+
+class uploadFile(APIView):
+
+    def get(self, request):
+
+        ACCESS_KEY_ID = 'AKIAZGQ5Y6VBANCPC365'
+        ACCESS_SECRET_KEY = '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'
+        BUCKET_NAME = 'elasticbeanstalk-us-east-2-632496387394'
+        FILE_NAME = 'InvoiceTemplate.docx';
+
+
+        data = open(FILE_NAME, 'rb')
+
+        # S3 Connect
+        s3 = boto3.resource(
+            's3',
+            aws_access_key_id=ACCESS_KEY_ID,
+            aws_secret_access_key=ACCESS_SECRET_KEY,
+            config=Config(signature_version='s3v4')
+        )
+
+        # Image Uploaded
+        s3.Bucket(BUCKET_NAME).put_object(Key=FILE_NAME, Body=data, ACL='public-read')
+
+        print ("Done")
+        return Response({'message': "Uploaded"})
+
+class GenerateInvoice(APIView):
+
+    def post(self, request):
+        template = "InvoiceTemplate.docx"
+        document = MailMerge(template)
+        jobs_history = []
+        jobs = request.data['jobs']
+        yard = None
+        account = None
+        accountName = None
         
+        total = 0
+        invoiceName = 'temp'
+        for x in jobs:
+            if yard is None:
+                yard = Yard.objects.get(pk= x['yard'])    
+                account = Account.objects.get(pk = yard.account_id)               
+
+                accountName = account.f_name + " " + account.l_name
+            
+            entry_list = list(JobExpense.objects.filter(job= x['jobid']).values())
+            for e in entry_list:
+                total += e['cost']
+                job = {
+                    'Qty': '1',
+                    'JobAddress': account.address,
+                    'Description': e['name'],
+                    'UPrice': str(e['cost']),
+                    'LinePrice': str(e['cost'])
+                }
+                jobs_history.append(job)
+
+        
+        invoice = Invoice.objects.create_invoice(invoiceName, total, account)
+        invoiceName = account.l_name + '_' + account.f_name +  '-' + 'InvoiceID_' + str(invoice.invoiceid) + '.docx'
+        invoice.invoice_name = invoiceName
+        invoice.save()
+
+        document.merge(
+            BillingName = accountName,
+            BillingAddress = account.address + '\n' + account.city + ', ' + account.state + ', ' + str(account.zip_code),
+            BillingJob = "Mowing",
+
+            AccountName = accountName,
+
+            Date='{:%m-%d-%Y}'.format(date.today()),
+            InvoiceId = str(invoice.invoiceid),
+
+            SubTotal = str(total),
+            Total = str(total)
+
+        )
+        document.merge_rows('Qty', jobs_history)
+
+
+        document.write('Invoices/' +  invoiceName)
+
+        self.UploadInvoice(invoiceName)
+
+        for x in jobs:
+            job = Job.objects.get(pk = x['jobid'])
+            job.invoiceid = invoice.invoiceid
+            job.invoiced = True
+            job.save()
+        return Response({'message': "Printed"})
+        
+    
+    def UploadInvoice(self, invoiceName):
+        
+        FILE_NAME = 'Invoices/' + invoiceName
+        data = open(FILE_NAME, 'rb')
+        file_name = default_storage.save(FILE_NAME, data)
+        os.remove(FILE_NAME )
+
+       
+            
+
+class OverideInvoice(APIView):
+
+    def post(self, request):
+        print(request.FILES['file'])
+        files = request.data['file']
+        print(files.name)
+        file_name = default_storage.save('Invoices/' + files.name, files)
+
+        
+
+        return Response({'message': "Uploaded"})
+
+class DeleteInvoice(APIView):
+
+    def get(self,request):
+        invoiceid = request.GET.get('invoiceid', '0')
+        invoice = Invoice.objects.get(pk=invoiceid)
+        print(invoice.invoiceid)
+        if invoice is not None:
+            default_storage.delete('Invoices/' + invoice.invoice_name)
+            invoice.delete()
+            content = {'message': 'Invoice successfully deleted'}
+            return Response(content, status=status.HTTP_200_OK)
+        else: 
+            content = {'message': 'Invoice not found in database with id of ' + invoiceid}
+            return Response(content, status=status.HTTP_404_NOT_FOUND)
+
+class InvoiceJobs(APIView):
+
+    def get(self, request):
+        id = request.GET.get('invoiceid', '0')
+        jobs = Job.objects.filter(invoiceid=id)
+        logger.info(jobs)
+        serializer = JobSerializer(jobs, many=True)
+        if jobs is None:
+            return Response({"message": "No jobs " + id})
+
+        else:
+           return Response(serializer.data) 
+    
+class AccountInvoices(APIView):
+    def get(self, request):
+        id = request.GET.get('id', '0')
+        invoices = Invoice.objects.filter(account=id)
+        logger.info(invoices)
+        serializer = InvoiceSerializer(invoices, many=True)
+        if invoices is None:
+            return Response({"message": "No invoices for id = " + id})
+
+        else:
+           return Response(serializer.data)
 
 
