@@ -181,10 +181,16 @@ class GenerateInvoice(APIView):
 class OverideInvoice(APIView):
 
     def post(self, request):
-        print(request.FILES['file'])
         files = request.data['file']
-        print(files.name)
-        file_name = default_storage.save('Invoices/' + files.name, files)
+        id = request.data['id']
+        invoice = Invoice.objects.get(pk=id)
+        if invoice is not None: 
+            default_storage.delete('Invoices/' + invoice.invoice_name)
+            fileName = files.name[:-5] + '_' + files.name[-5:]
+            print(fileName)
+            file_names = default_storage.save('Invoices/' + fileName, files)
+            invoice.invoice_name = fileName
+            invoice.save()
 
         
 
