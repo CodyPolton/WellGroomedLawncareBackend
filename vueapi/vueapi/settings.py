@@ -20,13 +20,14 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 # See https://docs.djangoproject.com/en/3.0/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = '#_)^-_#cvc8hi+^w0m1pwstsefi7y$#0((fq4oy$4r9wtht(&6'
+SECRET_KEY = os.environ['SECRET_KEY']
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = os.environ['DEBUG']
 
-# 'backend-prod.8t73xwp3hr.us-east-2.elasticbeanstalk.com'
-ALLOWED_HOSTS = []
+# 'well-groomedadmin.com'
+
+ALLOWED_HOSTS = [os.environ['ALLOWED_HOSTS']]
 
 
 # Application definition
@@ -83,11 +84,11 @@ WSGI_APPLICATION = 'vueapi.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql_psycopg2',
-        'NAME': 'postgres',
-        'USER': 'postgres',
-        'PASSWORD': 'Groomed1!',
-        'HOST': 'wellgroomeddatabase.c8oxkikduujv.us-east-2.rds.amazonaws.com',
-        'PORT': '5432'
+        'NAME': os.environ['DB_NAME'],
+        'USER': os.environ['DB_USER'],
+        'PASSWORD': os.environ['DB_PASSWORD'],
+        'HOST': os.environ['DB_HOST'],
+        'PORT': os.environ['DB_PORT']
     }
 }
 
@@ -135,19 +136,16 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/3.0/howto/static-files/
 
-AWS_ACCESS_KEY_ID = 'AKIAZGQ5Y6VBANCPC365'
-AWS_SECRET_ACCESS_KEY = '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'
-DEFAULT_FILE_STORAGE = 'storages.backends.s3boto3.S3Boto3Storage'
-AWS_STORAGE_BUCKET_NAME = 'elasticbeanstalk-us-east-2-632496387394'
-AWS_S3_REGION_NAME = 'us-east-1'
 
-USE_S3 = 'TRUE'
+
+
+USE_S3 = os.environ['USE_S3']
 
 if USE_S3:
     # aws settings
-    AWS_ACCESS_KEY_ID = 'AKIAZGQ5Y6VBANCPC365'
-    AWS_SECRET_ACCESS_KEY = '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'
-    AWS_STORAGE_BUCKET_NAME = 'elasticbeanstalk-us-east-2-632496387394'
+    AWS_ACCESS_KEY_ID = os.environ['ACCESS_KEY_ID']
+    AWS_SECRET_ACCESS_KEY = os.environ['SECRET_ACCESS_KEY']
+    AWS_STORAGE_BUCKET_NAME = os.environ['BUCKET_NAME']
     AWS_DEFAULT_ACL = 'public-read'
     AWS_S3_CUSTOM_DOMAIN = f'{AWS_STORAGE_BUCKET_NAME}.s3-website.us-east-2.amazonaws.com'
     AWS_S3_OBJECT_PARAMETERS = {'CacheControl': 'max-age=86400'}
@@ -157,8 +155,13 @@ if USE_S3:
     MEDIA_URL = f'https://{AWS_S3_CUSTOM_DOMAIN}/{PUBLIC_MEDIA_LOCATION}/'
     DEFAULT_FILE_STORAGE = 'vueapi.storage_backends.PublicMediaStorage'
 
-    STATIC_URL = '/staticfiles/'
-    STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
+    
+else: 
+    MEDIA_URL = '/mediafiles/'
+    MEDIA_ROOT = os.path.join(BASE_DIR, 'mediafiles')
+
+STATIC_URL = '/static/'
+STATIC_ROOT = os.path.join(BASE_DIR,'static/')
 
 
 

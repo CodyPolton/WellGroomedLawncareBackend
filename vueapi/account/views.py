@@ -75,31 +75,32 @@ class YardMowedCheck(APIView):
             else: 
                 return Response({'message': "Mowed today"})
 
-class uploadFile(APIView):
+# class uploadFile(APIView):
 
-    def get(self, request):
+#     def get(self, request):
+#         test = os.environ['TEST']
+#         print(test)
+#         ACCESS_KEY_ID = 
+#         ACCESS_SECRET_KEY = 
+#         BUCKET_NAME = 
+#         FILE_NAME = 'InvoiceTemplate.docx';
 
-        ACCESS_KEY_ID = 'AKIAZGQ5Y6VBANCPC365'
-        ACCESS_SECRET_KEY = '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'
-        BUCKET_NAME = 'elasticbeanstalk-us-east-2-632496387394'
-        FILE_NAME = 'InvoiceTemplate.docx';
 
+#         data = open(FILE_NAME, 'rb')
 
-        data = open(FILE_NAME, 'rb')
+#         # S3 Connect
+#         s3 = boto3.resource(
+#             's3',
+#             aws_access_key_id=ACCESS_KEY_ID,
+#             aws_secret_access_key=ACCESS_SECRET_KEY,
+#             config=Config(signature_version='s3v4')
+#         )
 
-        # S3 Connect
-        s3 = boto3.resource(
-            's3',
-            aws_access_key_id=ACCESS_KEY_ID,
-            aws_secret_access_key=ACCESS_SECRET_KEY,
-            config=Config(signature_version='s3v4')
-        )
+#         # Image Uploaded
+#         s3.Bucket(BUCKET_NAME).put_object(Key=FILE_NAME, Body=data, ACL='public-read')
 
-        # Image Uploaded
-        s3.Bucket(BUCKET_NAME).put_object(Key=FILE_NAME, Body=data, ACL='public-read')
-
-        print ("Done")
-        return Response({'message': "Uploaded"})
+#         print ("Done")
+#         return Response({'message': "Uploaded"})
 
 class GenerateInvoice(APIView):
 
@@ -137,7 +138,7 @@ class GenerateInvoice(APIView):
         invoice = Invoice.objects.create_invoice(invoiceName, total, account)
         invoiceName = account.l_name + '_' + account.f_name +  '-' + 'InvoiceID_' + str(invoice.invoiceid) + '.docx'
         invoice.invoice_name = invoiceName
-        invoice.save()
+        
 
         document.merge(
             BillingName = accountName,
@@ -156,9 +157,11 @@ class GenerateInvoice(APIView):
         document.merge_rows('Qty', jobs_history)
 
 
-        document.write('Invoices/' +  invoiceName)
+        document.write('tmp/' +  invoiceName)
 
         self.UploadInvoice(invoiceName)
+
+        invoice.save()
 
         for x in jobs:
             job = Job.objects.get(pk = x['jobid'])
@@ -171,9 +174,9 @@ class GenerateInvoice(APIView):
     def UploadInvoice(self, invoiceName):
         
         FILE_NAME = 'Invoices/' + invoiceName
-        data = open(FILE_NAME, 'rb')
+        data = open('tmp/' + invoiceName, 'rb')
         file_name = default_storage.save(FILE_NAME, data)
-        os.remove(FILE_NAME )
+        os.remove('tmp/' + invoiceName)
 
        
             
