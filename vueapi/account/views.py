@@ -108,7 +108,10 @@ class GenerateInvoice(APIView):
         template = "InvoiceTemplate.docx"
         document = MailMerge(template)
         jobs_history = []
-        jobs = request.data['jobs']
+        jobs = request.data.get('jobs')
+        if jobs is None: 
+            content = {'message': 'No Jobs sent to backend'}
+            return Response(content, status=status.HTTP_404_NOT_FOUND)
         yard = None
         account = None
         accountName = None
@@ -173,7 +176,7 @@ class GenerateInvoice(APIView):
     
     def UploadInvoice(self, invoiceName):
         
-        FILE_NAME = 'Invoices/' + invoiceName
+        FILE_NAME = os.environ['INVOICE_ENV'] + 'Invoices/' + invoiceName
         data = open('tmp/' + invoiceName, 'rb')
         file_name = default_storage.save(FILE_NAME, data)
         os.remove('tmp/' + invoiceName)
@@ -187,17 +190,20 @@ class OverideInvoice(APIView):
         files = request.data['file']
         id = request.data['id']
         invoice = Invoice.objects.get(pk=id)
+        print(invoice)
         if invoice is not None: 
-            default_storage.delete('Invoices/' + invoice.invoice_name)
+            default_storage.delete(os.environ['INVOICE_ENV'] + 'Invoices/' + invoice.invoice_name)
             fileName = files.name[:-5] + '_' + files.name[-5:]
             print(fileName)
-            file_names = default_storage.save('Invoices/' + fileName, files)
+            file_names = default_storage.save(os.environ['INVOICE_ENV'] + 'Invoices/' + fileName, files)
             invoice.invoice_name = fileName
             invoice.save()
+            return Response({'message': "Uploaded"})
 
         
 
-        return Response({'message': "Uploaded"})
+        content = {'message': 'Invoice not found in database with id of ' + id}
+        return Response(content, status=status.HTTP_404_NOT_FOUND)
 
 class DeleteInvoice(APIView):
 
@@ -206,7 +212,7 @@ class DeleteInvoice(APIView):
         invoice = Invoice.objects.get(pk=invoiceid)
         print(invoice.invoiceid)
         if invoice is not None:
-            default_storage.delete('Invoices/' + invoice.invoice_name)
+            default_storage.delete(os.environ['INVOICE_ENV'] + 'Invoices/' + invoice.invoice_name)
             invoice.delete()
             content = {'message': 'Invoice successfully deleted'}
             return Response(content, status=status.HTTP_200_OK)
