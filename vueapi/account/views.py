@@ -108,7 +108,10 @@ class GenerateInvoice(APIView):
         template = "InvoiceTemplate.docx"
         document = MailMerge(template)
         jobs_history = []
-        jobs = request.data['jobs']
+        jobs = request.data.get('jobs')
+        if jobs is None: 
+            content = {'message': 'No Jobs sent to backend'}
+            return Response(content, status=status.HTTP_404_NOT_FOUND)
         yard = None
         account = None
         accountName = None
