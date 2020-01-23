@@ -126,15 +126,21 @@ class GenerateInvoice(APIView):
                 accountName = account.f_name + " " + account.l_name
             
             entry_list = list(JobExpense.objects.filter(job= x['jobid']).values())
+            var i = 1
             for e in entry_list:
                 total += e['cost']
-                job = {
-                    'Qty': '1',
-                    'JobAddress': account.address,
-                    'Description': e['name'],
-                    'UPrice': str(e['cost']),
-                    'LinePrice': str(e['cost'])
-                }
+                if i == 1:
+                    job = {
+                        'JobAddress': account.address,
+                        'Description': e['description'],
+                        'DateCompleted': x['date_completed']
+
+                    }
+                    i = 2
+                else: 
+                    job = {
+                        'Description': e['description'],
+                    }
                 jobs_history.append(job)
 
         
@@ -146,7 +152,6 @@ class GenerateInvoice(APIView):
         document.merge(
             BillingName = accountName,
             BillingAddress = account.address + '\n' + account.city + ', ' + account.state + ', ' + str(account.zip_code),
-            BillingJob = "Mowing",
 
             AccountName = accountName,
 
@@ -180,6 +185,86 @@ class GenerateInvoice(APIView):
         data = open('tmp/' + invoiceName, 'rb')
         file_name = default_storage.save(FILE_NAME, data)
         os.remove('tmp/' + invoiceName)
+
+
+# class GenerateMowingInvoices(APIView):
+
+#     def post(self, request):
+#         template = "InvoiceTemplate.docx"
+#         document = MailMerge(template)
+#         jobs_history = []
+#         jobs = request.data.get('jobs')
+#         if jobs is None: 
+#             content = {'message': 'No Jobs sent to backend'}
+#             return Response(content, status=status.HTTP_404_NOT_FOUND)
+#         yard = None
+#         account = None
+#         accountName = None
+        
+#         total = 0
+#         invoiceName = 'temp'
+#         for x in jobs:
+#             if yard is None:
+#                 yard = Yard.objects.get(pk= x['yard'])    
+#                 account = Account.objects.get(pk = yard.account_id)               
+
+#                 accountName = account.f_name + " " + account.l_name
+            
+#             entry_list = list(JobExpense.objects.filter(job= x['jobid']).values())
+#             for e in entry_list:
+#                 total += e['cost']
+#                 job = {
+#                     'Qty': '1',
+#                     'JobAddress': account.address,
+#                     'Description': e['name'],
+#                     'UPrice': str(e['cost']),
+#                     'LinePrice': str(e['cost'])
+#                 }
+#                 jobs_history.append(job)
+
+        
+#         invoice = Invoice.objects.create_invoice(invoiceName, total, account)
+#         invoiceName = account.l_name + '_' + account.f_name +  '-' + 'InvoiceID_' + str(invoice.invoiceid) + '.docx'
+#         invoice.invoice_name = invoiceName
+        
+
+#         document.merge(
+#             BillingName = accountName,
+#             BillingAddress = account.address + '\n' + account.city + ', ' + account.state + ', ' + str(account.zip_code),
+#             BillingJob = "Mowing",
+
+#             AccountName = accountName,
+
+#             Date='{:%m-%d-%Y}'.format(date.today()),
+#             InvoiceId = str(invoice.invoiceid),
+
+#             SubTotal = str(total),
+#             Total = str(total)
+
+#         )
+#         document.merge_rows('Qty', jobs_history)
+
+
+#         document.write('tmp/' +  invoiceName)
+
+#         self.UploadInvoice(invoiceName)
+
+#         invoice.save()
+
+#         for x in jobs:
+#             job = Job.objects.get(pk = x['jobid'])
+#             job.invoiceid = invoice.invoiceid
+#             job.invoiced = True
+#             job.save()
+#         return Response({'message': "Printed"})
+        
+    
+#     def UploadInvoice(self, invoiceName):
+        
+#         FILE_NAME = os.environ['INVOICE_ENV'] + 'Invoices/' + invoiceName
+#         data = open('tmp/' + invoiceName, 'rb')
+#         file_name = default_storage.save(FILE_NAME, data)
+#         os.remove('tmp/' + invoiceName)
 
        
             
