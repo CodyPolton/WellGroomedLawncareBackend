@@ -46,6 +46,7 @@ class JobType(models.Model):
 class Job(models.Model):
     jobid = models.AutoField(primary_key=True)
     yard = models.ForeignKey('Yard', on_delete=models.CASCADE)
+    account = models.ForeignKey('Account', on_delete=models.CASCADE)
     name = models.CharField(max_length=255)
     description = models.TextField()
     job_type = models.CharField(max_length=255)
