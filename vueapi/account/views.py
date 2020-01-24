@@ -203,6 +203,7 @@ class GenerateMowingInvoices(APIView):
                 " ORDER BY j.account_id desc")
         jobs = Job.objects.raw(jobsql)
         for x in range(jobs[0].account_id + 1):
+            print("x = " + str(x))
             accountJobs = []
             for job in jobs:
                 if(job.account_id == x):
@@ -210,25 +211,36 @@ class GenerateMowingInvoices(APIView):
             account = None
             if(len(accountJobs) > 0):
                 account = Account.objects.get(pk = x)
-                yardJobs = []
+                accountName = account.f_name + " " + account.l_name
+                jobs_history = []
+                total = None
+                print(accountName)
                 for job in accountJobs:
-                    accountJobs.remove(job)
-                    for x in accountJobs: 
-                        if(x.yard_id == job.yard_id):
-                            accountJobs.remove(x)
-                            print("match " + str(x.yard_id))
+                    yardJobs = []
+                    if(not job.invoiced):
+                        yardJobs.append(job)
+                        accountJobs.remove(job)
+                        yard = Yard.objects.get(pk = job.yard_id)
+                        
+                        for x in accountJobs: 
+                            if(x.yard_id == job.yard_id and not x.invoiced):
+                                x.invoiced = True
+                                yardJobs.append(x)
+                                print("match " + str(x.yard_id))
+                        print("---------------")
+                        for y in yardJobs:
+                            print(y.jobid)
+                            print(yard.address)
+                            # total += e['cost']
+                            # job = {
+                            #     'Qty': '1',
+                            #     'JobAddress': account.address,
+                            #     'Description': e['name'],
+                            #     'UPrice': str(e['cost']),
+                            #     'LinePrice': str(e['cost'])
+                            # }
+                            # jobs_history.append(job)
 
-
-
-                
-
-            
-
-        
-        
-        yard = None
-        account = None
-        accountName = None
         
         # total = 0
         # invoiceName = 'temp'
