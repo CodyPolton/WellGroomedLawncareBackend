@@ -126,7 +126,7 @@ class GenerateInvoice(APIView):
                 accountName = account.f_name + " " + account.l_name
             
             entry_list = list(JobExpense.objects.filter(job= x['jobid']).values())
-            var i = 1
+            i = 1
             for e in entry_list:
                 total += e['cost']
                 if i == 1:
@@ -162,7 +162,7 @@ class GenerateInvoice(APIView):
             Total = str(total)
 
         )
-        document.merge_rows('Qty', jobs_history)
+        document.merge_rows('Description', jobs_history)
 
 
         document.write('tmp/' +  invoiceName)
@@ -187,65 +187,94 @@ class GenerateInvoice(APIView):
         os.remove('tmp/' + invoiceName)
 
 
-# class GenerateMowingInvoices(APIView):
+class GenerateMowingInvoices(APIView):
 
-#     def post(self, request):
-#         template = "InvoiceTemplate.docx"
-#         document = MailMerge(template)
-#         jobs_history = []
-#         jobs = request.data.get('jobs')
-#         if jobs is None: 
-#             content = {'message': 'No Jobs sent to backend'}
-#             return Response(content, status=status.HTTP_404_NOT_FOUND)
-#         yard = None
-#         account = None
-#         accountName = None
-        
-#         total = 0
-#         invoiceName = 'temp'
-#         for x in jobs:
-#             if yard is None:
-#                 yard = Yard.objects.get(pk= x['yard'])    
-#                 account = Account.objects.get(pk = yard.account_id)               
+    def get(self, request):
+        template = "MowingInvoiceTemplate.docx"
+        document = MailMerge(template)
+        jobs_history = []
+        month = request.GET.get('month')
+        jobsql = ("select distinct j.* from accounts acc "
+                "inner join yards y on acc.accountid = y.account_id "
+                "inner join jobs j on j.yard_id = y.yardid " 
+                "where job_type = 'Mowing' " 
+                "and j.invoiced = false " 
+                "and EXTRACT(Month from date_completed) = " + month + 
+                " ORDER BY j.account_id desc")
+        jobs = Job.objects.raw(jobsql)
+        for x in range(jobs[0].account_id + 1):
+            accountJobs = []
+            for job in jobs:
+                if(job.account_id == x):
+                    accountJobs.append(job)
+            account = None
+            if(len(accountJobs) > 0):
+                account = Account.objects.get(pk = x)
+                yardJobs = []
+                for job in accountJobs:
+                    accountJobs.remove(job)
+                    for x in accountJobs: 
+                        if(x.yard_id == job.yard_id):
+                            accountJobs.remove(x)
+                            print("match " + str(x.yard_id))
 
-#                 accountName = account.f_name + " " + account.l_name
+
+
+                
+
             
-#             entry_list = list(JobExpense.objects.filter(job= x['jobid']).values())
-#             for e in entry_list:
-#                 total += e['cost']
-#                 job = {
-#                     'Qty': '1',
-#                     'JobAddress': account.address,
-#                     'Description': e['name'],
-#                     'UPrice': str(e['cost']),
-#                     'LinePrice': str(e['cost'])
-#                 }
-#                 jobs_history.append(job)
 
         
-#         invoice = Invoice.objects.create_invoice(invoiceName, total, account)
-#         invoiceName = account.l_name + '_' + account.f_name +  '-' + 'InvoiceID_' + str(invoice.invoiceid) + '.docx'
-#         invoice.invoice_name = invoiceName
+        
+        yard = None
+        account = None
+        accountName = None
+        
+        # total = 0
+        # invoiceName = 'temp'
+        # for x in jobs:
+        #     if yard is None:
+        #         yard = Yard.objects.get(pk= x['yard'])    
+        #         account = Account.objects.get(pk = yard.account_id)               
+
+        #         accountName = account.f_name + " " + account.l_name
+            
+        #     entry_list = list(JobExpense.objects.filter(job= x['jobid']).values())
+        #     for e in entry_list:
+        #         total += e['cost']
+        #         job = {
+        #             'Qty': '1',
+        #             'JobAddress': account.address,
+        #             'Description': e['name'],
+        #             'UPrice': str(e['cost']),
+        #             'LinePrice': str(e['cost'])
+        #         }
+        #         jobs_history.append(job)
+
+        
+        # invoice = Invoice.objects.create_invoice(invoiceName, total, account)
+        # invoiceName = account.l_name + '_' + account.f_name +  '-' + 'InvoiceID_' + str(invoice.invoiceid) + '.docx'
+        # invoice.invoice_name = invoiceName
         
 
-#         document.merge(
-#             BillingName = accountName,
-#             BillingAddress = account.address + '\n' + account.city + ', ' + account.state + ', ' + str(account.zip_code),
-#             BillingJob = "Mowing",
+        # document.merge(
+        #     BillingName = accountName,
+        #     BillingAddress = account.address + '\n' + account.city + ', ' + account.state + ', ' + str(account.zip_code),
+        #     BillingJob = "Mowing",
 
-#             AccountName = accountName,
+        #     AccountName = accountName,
 
-#             Date='{:%m-%d-%Y}'.format(date.today()),
-#             InvoiceId = str(invoice.invoiceid),
+        #     Date='{:%m-%d-%Y}'.format(date.today()),
+        #     InvoiceId = str(invoice.invoiceid),
 
-#             SubTotal = str(total),
-#             Total = str(total)
+        #     SubTotal = str(total),
+        #     Total = str(total)
 
-#         )
-#         document.merge_rows('Qty', jobs_history)
+        # )
+        # document.merge_rows('Qty', jobs_history)
 
 
-#         document.write('tmp/' +  invoiceName)
+        # document.write('tmp/' +  invoiceName)
 
 #         self.UploadInvoice(invoiceName)
 
