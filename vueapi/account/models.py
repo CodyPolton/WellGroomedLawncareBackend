@@ -105,6 +105,15 @@ class Invoice(models.Model):
         db_table = 'invoices'
         ordering = ['invoiceid']
 
+class EmailTemplates(models.Model):
+    templateid = models.AutoField(primary_key=True)
+    subject = models.CharField(max_length=255)
+    body = models.TextField(blank=True)
+    
+    class Meta:
+        db_table = 'email_templates'
+        ordering = ['templateid']
+
 
 
 

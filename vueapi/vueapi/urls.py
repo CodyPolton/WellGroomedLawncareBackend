@@ -17,7 +17,8 @@ from django.contrib import admin
 from django.conf.urls import url
 from django.urls import path, include
 from .routers import router
-from account import views
+from account import views, invoiceviews, emailviews
+
 
 
 
@@ -29,12 +30,14 @@ urlpatterns = [
     url('api/expensesofjob', views.ExpensesOfJob.as_view()),
     url('api/yardmowedcheck', views.YardMowedCheck.as_view()),
     # url('api/upload', views.uploadFile.as_view()),
-    url('api/generateinvoice', views.GenerateInvoice.as_view()),
-    url('api/overideinvoice', views.OverideInvoice.as_view()),
-    url('api/invoicejobs', views.InvoiceJobs.as_view()),
-    url('api/accountinvoices', views.AccountInvoices.as_view()),
-    url('api/deleteinvoice', views.DeleteInvoice.as_view()),
-    url('api/mowinginvoices', views.GenerateMowingInvoices.as_view())
+    url('api/generateinvoice', invoiceviews.GenerateInvoice.as_view()),
+    url('api/overideinvoice', invoiceviews.OverideInvoice.as_view()),
+    url('api/invoicejobs', invoiceviews.InvoiceJobs.as_view()),
+    url('api/accountinvoices', invoiceviews.AccountInvoices.as_view()),
+    url('api/deleteinvoice', invoiceviews.DeleteInvoice.as_view()),
+    url('api/mowinginvoices', invoiceviews.GenerateMowingInvoices.as_view()),
+    url('api/emailinvoice', emailviews.EmailInvoice.as_view()),
+    url('api/testtemplate', emailviews.TestTemplate.as_view())
 
 ]
 
