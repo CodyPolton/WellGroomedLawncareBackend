@@ -60,7 +60,7 @@ class GenerateInvoice(APIView):
                 jobs_history.append(job)
 
         
-        invoice = Invoice.objects.create_invoice(invoiceName, total, account)
+        invoice = Invoice.objects.create_invoice(invoiceName, total, account, 'Individual')
         invoiceName = account.l_name + '_' + account.f_name +  '-' + 'InvoiceID_' + str(invoice.invoiceid) + '.docx'
         invoice.invoice_name = invoiceName
         
@@ -184,7 +184,7 @@ class GenerateMowingInvoices(APIView):
         
                             
                 invoiceName = 'temp'
-                invoice = Invoice.objects.create_invoice(invoiceName, total, account)
+                invoice = Invoice.objects.create_invoice(invoiceName, total, account, 'Mowing')
                 invoiceName = account.l_name + '_' + account.f_name +  '-' + 'InvoiceID_' + str(invoice.invoiceid) + '.docx'
                 invoice.invoice_name = invoiceName
 

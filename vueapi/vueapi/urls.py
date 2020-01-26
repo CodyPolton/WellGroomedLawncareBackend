@@ -37,7 +37,8 @@ urlpatterns = [
     url('api/deleteinvoice', invoiceviews.DeleteInvoice.as_view()),
     url('api/mowinginvoices', invoiceviews.GenerateMowingInvoices.as_view()),
     url('api/emailinvoice', emailviews.EmailInvoice.as_view()),
-    url('api/testtemplate', emailviews.TestTemplate.as_view())
+    url('api/testtemplate', emailviews.TestTemplate.as_view()),
+    url('api/emailallinvoices', emailviews.EmailAllInvoices.as_view())
 
 ]
 

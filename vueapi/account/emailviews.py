@@ -31,7 +31,11 @@ class EmailInvoice(APIView):
             return Response(content, status=status.HTTP_406_NOT_ACCEPTABLE)
         invoiceid = request.data.get('invoice')
         invoice = Invoice.objects.get(pk = invoiceid)
-        template = EmailTemplates.objects.get(pk = 2)
+        template = None
+        if(invoice.invoice_type == 'Mowing'):
+            template = EmailTemplates.objects.get(pk = 1)
+        elif(invoice.invoice_type == 'Individual'):
+            template = EmailTemplates.objects.get(pk = 2)
         subject = template.subject
         account = invoice.account
         receiver_email = ''
@@ -44,7 +48,44 @@ class EmailInvoice(APIView):
         prev = date.today().replace(day=1) - timedelta(days=1)
         month = getMonth(self, prev.month)
         generateEmail(self, receiver_email, name, month,  subject, template.body, invoice.invoice_name)
+        invoice.billed = True
+        invoice.save()
         content = {'message': 'Invoice has been sent out to ' + name}
+        return Response(content, status=status.HTTP_200_OK)
+
+class EmailAllInvoices(APIView):
+    def get(self, request):
+        invoicesql = 'select * from invoices where approved = true and billed = false'
+        
+        invoices = Invoice.objects.raw(invoicesql)
+        if(not invoices):
+            content = {'message': 'No invoices to email'}
+            return Response(content, status=status.HTTP_404_NOT_FOUND)
+        for invoice in invoices:
+            print(invoice.invoice_name)
+            template = None
+            if(invoice.invoice_type == 'Mowing'):
+                template = EmailTemplates.objects.get(pk = 1)
+            elif(invoice.invoice_type == 'Individual'):
+                template = EmailTemplates.objects.get(pk = 2)
+            subject = template.subject
+            account = invoice.account
+            receiver_email = ''
+            if(os.environ['INVOICE_ENV'] == 'prod/'):
+                receiver_email = account.email
+            else:
+                receiver_email = os.environ['TEST_EMAIL']
+                subject = subject + " in prod sends to " + account.email
+            name = account.f_name
+            prev = date.today().replace(day=1) - timedelta(days=1)
+            month = getMonth(self, prev.month)
+            print(receiver_email)
+            generateEmail(self, receiver_email, name, month,  subject, template.body, invoice.invoice_name)
+            invoice.billed = True
+            invoice.save()
+        
+        
+        content = {'message': 'Invoices have been sent out'}
         return Response(content, status=status.HTTP_200_OK)
 
 

@@ -84,8 +84,8 @@ class JobExpense(models.Model):
         ordering = ['job_expenseid']
 
 class InvoiceManager(models.Manager):
-    def create_invoice(self, name, total, accountid):
-        invoice = self.create(invoice_name=name, total_price=total, account=accountid )
+    def create_invoice(self, name, total, accountid, Itype):
+        invoice = self.create(invoice_name=name, total_price=total, account=accountid, invoice_type=Itype)
         return invoice
 
 class Invoice(models.Model):
@@ -93,6 +93,7 @@ class Invoice(models.Model):
     account = models.ForeignKey('Account', on_delete=models.CASCADE)
     total_price = models.DecimalField(max_digits=10, decimal_places=2)
     invoice_name = models.CharField(max_length=255)
+    invoice_type = models.CharField(max_length=255)
     paid = models.BooleanField(default = False)
     billed = models.BooleanField(default = False)
     approved = models.BooleanField(default = False)
