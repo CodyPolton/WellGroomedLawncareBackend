@@ -1,4 +1,5 @@
 from django.db import models
+from django.contrib.postgres.fields import ArrayField
 from django.core.validators import MaxValueValidator
 
 # Create your models here.
@@ -28,6 +29,14 @@ class Yard(models.Model):
     city = models.CharField(max_length=255)
     state = models.CharField(max_length=2)
     mow_price = models.DecimalField( max_digits=6, decimal_places=2, null=True)
+    scheduled = models.BooleanField(default = False)
+    crew = models.CharField(max_length=2, blank=True)
+    days = ArrayField(
+            models.CharField(max_length=6),
+            size=4,
+            default=list
+
+    )
     date_created = models.DateTimeField(auto_now_add=True, blank=True)
     date_updated = models.DateTimeField(auto_now=True, blank=True)
 
@@ -52,7 +61,7 @@ class Job(models.Model):
     job_type = models.CharField(max_length=255)
     date_completed = models.DateField(null=True)
     job_total = models.DecimalField( max_digits=10, decimal_places=2, null=True)
-    invoiced = models.BooleanField()
+    invoiced = models.BooleanField(default = False)
     invoiceid = models.CharField(max_length=255, blank=True)
     date_created = models.DateTimeField(auto_now_add=True, blank=True)
     date_updated = models.DateTimeField(auto_now=True, blank=True)
