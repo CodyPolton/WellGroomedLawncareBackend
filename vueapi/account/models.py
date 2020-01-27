@@ -30,7 +30,7 @@ class Yard(models.Model):
     state = models.CharField(max_length=2)
     mow_price = models.DecimalField( max_digits=6, decimal_places=2, null=True)
     scheduled = models.BooleanField(default = False)
-    crew = models.CharField(max_length=2, blank=True)
+    crew = models.CharField(max_length=255, blank=True)
     days = ArrayField(
             models.CharField(max_length=6, default='None'),
             size=4,
