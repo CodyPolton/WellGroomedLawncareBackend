@@ -1,6 +1,6 @@
 from rest_framework import viewsets
-from .models import Account, Yard, JobType, Job, JobExpenseType, JobExpense, Invoice, EmailTemplates
-from .serializers import AccountSerializer, YardSerializer, JobTypeSerializer, JobSerializer, JobExpenseSerializer, JobExpenseTypeSerializer, InvoiceSerializer, EmailTemplatesSerializer
+from .models import Account, Yard, JobType, Job, JobExpenseType, JobExpense, Invoice, EmailTemplates, Crew
+from .serializers import AccountSerializer, YardSerializer, JobTypeSerializer, JobSerializer, JobExpenseSerializer, JobExpenseTypeSerializer, InvoiceSerializer, EmailTemplatesSerializer, CrewSerializer
 
 class AccountViewSet(viewsets.ModelViewSet):
     queryset = Account.objects.all()
@@ -36,3 +36,7 @@ class InvoiceViewSet(viewsets.ModelViewSet):
 class EmailTemplatesViewSet(viewsets.ModelViewSet):
     queryset = EmailTemplates.objects.all()
     serializer_class = EmailTemplatesSerializer
+
+class CrewViewSet(viewsets.ModelViewSet):
+    queryset = Crew.objects.all()
+    serializer_class = CrewSerializer

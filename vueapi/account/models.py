@@ -19,7 +19,7 @@ class Account(models.Model):
 
     class Meta:
         db_table = 'accounts'
-        ordering = ['accountid']
+        ordering = ['-accountid']
 
 class Yard(models.Model):
     yardid = models.AutoField(primary_key=True)
@@ -32,9 +32,9 @@ class Yard(models.Model):
     scheduled = models.BooleanField(default = False)
     crew = models.CharField(max_length=2, blank=True)
     days = ArrayField(
-            models.CharField(max_length=6),
+            models.CharField(max_length=6, default='None'),
             size=4,
-            default=list
+            default=list,
 
     )
     date_created = models.DateTimeField(auto_now_add=True, blank=True)
@@ -42,7 +42,7 @@ class Yard(models.Model):
 
     class Meta:
         db_table = 'yards'
-        ordering = ['yardid']
+        ordering = ['-yardid']
 
 class JobType(models.Model):
     job_typeid = models.AutoField(primary_key=True)
@@ -68,7 +68,7 @@ class Job(models.Model):
 
     class Meta:
         db_table = 'jobs'
-        ordering = ['jobid']
+        ordering = ['-jobid']
 
 class JobExpenseType(models.Model):
     job_expense_typeid = models.AutoField(primary_key=True)
@@ -90,7 +90,7 @@ class JobExpense(models.Model):
 
     class Meta:
         db_table = 'job_expense'
-        ordering = ['job_expenseid']
+        ordering = ['-job_expenseid']
 
 class InvoiceManager(models.Manager):
     def create_invoice(self, name, total, accountid, Itype):
@@ -113,7 +113,7 @@ class Invoice(models.Model):
 
     class Meta:
         db_table = 'invoices'
-        ordering = ['invoiceid']
+        ordering = ['-invoiceid']
 
 class EmailTemplates(models.Model):
     templateid = models.AutoField(primary_key=True)
@@ -123,6 +123,11 @@ class EmailTemplates(models.Model):
     class Meta:
         db_table = 'email_templates'
         ordering = ['templateid']
+
+class Crew(models.Model):
+    crewid = models.AutoField(primary_key=True)
+    name = models.CharField(max_length=255)
+    crew_lead = models.CharField(max_length=255, blank=True)
 
 
 

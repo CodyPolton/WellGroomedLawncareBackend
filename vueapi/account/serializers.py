@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import Account, Yard, JobType, Job, JobExpenseType, JobExpense, Invoice, EmailTemplates
+from .models import Account, Yard, JobType, Job, JobExpenseType, JobExpense, Invoice, EmailTemplates, Crew
 class PatchModelSerializer(serializers.ModelSerializer):
     def __init__(self, *args, **kwargs):
         kwargs['partial'] = True
@@ -45,5 +45,9 @@ class EmailTemplatesSerializer(PatchModelSerializer):
         model = EmailTemplates
         fields = '__all__'
 
+class CrewSerializer(PatchModelSerializer):
+    class Meta:
+        model = Crew
+        fields = '__all__'
 
 
