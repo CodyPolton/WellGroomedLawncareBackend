@@ -29,6 +29,7 @@ urlpatterns = [
     url('api/yardjobs', views.JobsOfYard.as_view()),
     url('api/expensesofjob', views.ExpensesOfJob.as_view()),
     url('api/yardmowedcheck', views.YardMowedCheck.as_view()),
+    url('api/yardforcrew', views.YardForCrew.as_view()),
     # url('api/upload', views.uploadFile.as_view()),
     url('api/generateinvoice', invoiceviews.GenerateInvoice.as_view()),
     url('api/overideinvoice', invoiceviews.OverideInvoice.as_view()),

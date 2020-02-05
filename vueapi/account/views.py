@@ -75,6 +75,20 @@ class YardMowedCheck(APIView):
             else: 
                 return Response({'message': "Mowed today"})
 
+class YardForCrew(APIView):
+
+    def get(self,request):
+        crewid = request.GET.get('crew', '0')
+        if crewid == '0':
+            return Response({"message": "Need crew to process"})
+        else: 
+            yards = Yard.objects.filter(crew=crewid)
+            serializer = YardSerializer(yards, many=True)
+            if not yards:
+                return Response({'message': "No yards for crew" + crewid})
+            else: 
+                return Response(serializer.data) 
+
 # class uploadFile(APIView):
 
 #     def get(self, request):
