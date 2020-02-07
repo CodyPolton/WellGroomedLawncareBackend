@@ -39,11 +39,13 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    "django_apscheduler",
     'account',
     'rest_framework',
     'corsheaders',
     'storages',
 ]
+APSCHEDULER_DATETIME_FORMAT =  "N j, Y, f:s a"  # Default
 
 MIDDLEWARE = [
     'corsheaders.middleware.CorsMiddleware',
