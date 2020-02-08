@@ -19,6 +19,8 @@ from django.urls import path, include
 from .routers import router
 from account import views, invoiceviews, emailviews
 
+from rest_framework_simplejwt import views as jwt_views
+from rest_framework_jwt.views import obtain_jwt_token, refresh_jwt_token
 
 
 
@@ -39,7 +41,12 @@ urlpatterns = [
     url('api/mowinginvoices', invoiceviews.GenerateMowingInvoices.as_view()),
     url('api/emailinvoice', emailviews.EmailInvoice.as_view()),
     url('api/testtemplate', emailviews.TestTemplate.as_view()),
-    url('api/emailallinvoices', emailviews.EmailAllInvoices.as_view())
+    url('api/emailallinvoices', emailviews.EmailAllInvoices.as_view()),
+    # path('api/token/', jwt_views.TokenObtainPairView.as_view(), name='token_obtain_pair'),
+    # path('api/token/refresh/', jwt_views.TokenRefreshView.as_view(), name='token_refresh'),
+    url(r'^api/token/', obtain_jwt_token),
+    url(r'^api/token/refresh/', refresh_jwt_token),
+
 
 ]
 
