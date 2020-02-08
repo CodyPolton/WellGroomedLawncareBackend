@@ -3,23 +3,25 @@
 #========================================
 from apscheduler.schedulers.background import BackgroundScheduler
 from django_apscheduler.jobstores import DjangoJobStore, register_events, register_job
-from pytz import utc
+import pytz
 import time
 scheduler = BackgroundScheduler()
-scheduler.configure(timezone=utc)
+scheduler.configure(timezone='US/Central')
 register_events(scheduler)
 
-@register_job(scheduler, "interval", seconds=10)
-def test_job():
-    time.sleep(4)
-    print("I'm a test job!")
+
+# def test_job():
+#     time.sleep(4)
+#     print("I'm a test job!")
 
 # jobs
 import scheduler_jobs
 
-scheduler.add_job(scheduler_jobs.FirstCronTest, 'interval', seconds=100)
-scheduler.add_job(test_job, 'interval', seconds=10, id='test_job')
-scheduler.add_jobstore(DjangoJobStore(), 'deafault')
+scheduler.add_jobstore(DjangoJobStore(), 'default')
+#scheduler.add_job(scheduler_jobs.FirstCronTest, 'interval', seconds=100)
+
+scheduler.add_job(scheduler_jobs.test_job, 'cron', id='Test', hour=18, minute=38 )
+
 scheduler.start()
 
 #========================================
