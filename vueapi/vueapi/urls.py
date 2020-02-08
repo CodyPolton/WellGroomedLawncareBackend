@@ -18,7 +18,8 @@ from django.conf.urls import url
 from django.urls import path, include
 from .routers import router
 from account import views
-
+from rest_framework_simplejwt import views as jwt_views
+from rest_framework_jwt.views import obtain_jwt_token, refresh_jwt_token
 
 
 urlpatterns = [
@@ -33,7 +34,11 @@ urlpatterns = [
     url('api/overideinvoice', views.OverideInvoice.as_view()),
     url('api/invoicejobs', views.InvoiceJobs.as_view()),
     url('api/accountinvoices', views.AccountInvoices.as_view()),
-    url('api/deleteinvoice', views.DeleteInvoice.as_view())
+    url('api/deleteinvoice', views.DeleteInvoice.as_view()),
+# path('api/token/', jwt_views.TokenObtainPairView.as_view(), name='token_obtain_pair'),
+#     path('api/token/refresh/', jwt_views.TokenRefreshView.as_view(), name='token_refresh'),
+    url(r'^api/token/', obtain_jwt_token),
+  url(r'^api/token/refresh/', refresh_jwt_token),
 
 ]
 
