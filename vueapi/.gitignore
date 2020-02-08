@@ -3,6 +3,7 @@ venv/
 .DS_Store
 /node_modules
 .vscode
+~$*
 *.pyc
 *.log
 backend/backend-framework/framework/__pycache__
