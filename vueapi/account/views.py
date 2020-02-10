@@ -1,10 +1,13 @@
 from rest_framework import status
 from rest_framework.views import APIView
 from rest_framework.response import Response
+from rest_framework.authtoken.models import Token
 from django.shortcuts import render
 from django.conf import settings
 from django.core.files.storage import FileSystemStorage
+from django.contrib.auth.models import User, Group
 import boto3
+import jsons
 from botocore.client import Config
 import os
 from .models import Yard, Job, JobExpense, Invoice, InvoiceManager, Account
@@ -88,6 +91,14 @@ class YardForCrew(APIView):
                 return Response({'message': "No yards for crew" + crewid})
             else: 
                 return Response(serializer.data) 
+
+class ReturnUserDetails(APIView):
+
+    def post(self,request):
+        token = Token.objects.get(key=request.data.get('token'))
+        group = Group.objects.get(user= token.user_id)
+        return Response({'group_level': group.id, 'first_name': token.user.first_name, 'last_name': token.user.last_name, 'group_name': group.name, 'user_id' : token.user.id})
+        
 
 # class uploadFile(APIView):
 

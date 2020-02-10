@@ -17,15 +17,17 @@ from django.contrib import admin
 from django.conf.urls import url
 from django.urls import path, include
 from .routers import router
-from account import views, invoiceviews, emailviews
+from account import views, invoiceviews, emailviews, timesheetviews
 
 from rest_framework_simplejwt import views as jwt_views
 from rest_framework_jwt.views import obtain_jwt_token, refresh_jwt_token
+from rest_framework.authtoken.views import obtain_auth_token 
 
 
 
 urlpatterns = [
     path('admin/', admin.site.urls),
+    path('api/api-token-auth/', obtain_auth_token, name='api_token_auth'),
     path('api/', include(router.urls)),
     url('api/accountsyards', views.YardsOfAccount.as_view()),
     url('api/yardjobs', views.JobsOfYard.as_view()),
@@ -42,10 +44,13 @@ urlpatterns = [
     url('api/emailinvoice', emailviews.EmailInvoice.as_view()),
     url('api/testtemplate', emailviews.TestTemplate.as_view()),
     url('api/emailallinvoices', emailviews.EmailAllInvoices.as_view()),
+    url('api/clockinstatus', timesheetviews.ClockinStatus.as_view()),
     # path('api/token/', jwt_views.TokenObtainPairView.as_view(), name='token_obtain_pair'),
     # path('api/token/refresh/', jwt_views.TokenRefreshView.as_view(), name='token_refresh'),
     url(r'^api/token/', obtain_jwt_token),
     url(r'^api/token/refresh/', refresh_jwt_token),
+    url('api/returnuserdetails', views.ReturnUserDetails.as_view()),
+    
 
 
 ]
