@@ -39,3 +39,16 @@ class ClockinStatus(APIView):
             tsserializer = TimesheetSerializer(timesheet, many=True)
             serializer = PayPeriodSerializer(payperiod, many=False)
             return Response({'status': status, 'timesheet': tsserializer.data, 'payperiod': serializer.data})
+
+class GetTimesheet(APIView):
+    
+    def post(self, request):
+        userid = request.data.get('userid')
+        payperiod = PayPeriod.objects.all().first()
+        weektimesheet = Timesheet.objects.filter(userid = userid, payperiodid = payperiod.payperiodid)
+        tsserializer = TimesheetSerializer(weektimesheet, many=True)
+        print(weektimesheet)
+        if not weektimesheet:
+            return Response({'status': 'None'})
+        else:
+            return Response({'timesheet': tsserializer.data, 'status': 'Timesheets'})
