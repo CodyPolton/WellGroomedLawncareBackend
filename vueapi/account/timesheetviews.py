@@ -7,7 +7,6 @@ from django.conf import settings
 from django.core.files.storage import FileSystemStorage
 from django.contrib.auth.models import User, Group
 import boto3
-import jsons
 from botocore.client import Config
 import os
 from .models import Yard, Job, JobExpense, Invoice, InvoiceManager, Account, Timesheet, PayPeriod
