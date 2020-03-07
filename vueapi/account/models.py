@@ -129,20 +129,36 @@ class Crew(models.Model):
     name = models.CharField(max_length=255)
     crew_lead = models.CharField(max_length=255, blank=True)
 
+    class Meta:
+        db_table = 'crew'
+        ordering = ['crewid']
+
 class Timesheet(models.Model):
     timesheetid = models.AutoField(primary_key=True)
     payperiodid = models.CharField(max_length=8)
     dayofweek = models.CharField(max_length=11)
-    crewid = models.CharField(max_length=5, blank=True)
+    userid = models.CharField(max_length=5, blank=True)
     status = models.CharField(max_length=40, blank=True)
     start_time = models.TimeField(blank=True)
-    end_time = models.TimeField(blank=True)
-    seconds_paused = models.PositiveIntegerField(validators=[MaxValueValidator(99999)])
-    pause_time = models.TimeField(blank=True)
-    hours = models.DecimalField(max_digits=2, decimal_places=2)
+    end_time = models.TimeField(null=True)
+    seconds_paused = models.PositiveIntegerField(validators=[MaxValueValidator(99999)], null =True)
+    pause_time = models.TimeField(null=True)
+    hours = models.DecimalField(max_digits=4, decimal_places=2, null=True)
     date_created = models.DateTimeField(auto_now_add=True, blank=True)
     date_updated = models.DateTimeField(auto_now=True, blank=True)
 
+    class Meta:
+        db_table = 'timesheet'
+        ordering = ['-timesheetid']
+
+class PayPeriod(models.Model):
+    payperiodid = models.AutoField(primary_key=True)
+    startDate = models.DateField()
+    endDate = models.DateField()
+
+    class Meta:
+        db_table = 'payperiod'
+        ordering = ['-payperiodid']
 
 
 
