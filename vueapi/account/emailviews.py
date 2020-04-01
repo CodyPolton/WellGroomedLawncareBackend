@@ -44,6 +44,9 @@ class EmailInvoice(APIView):
         else:
             receiver_email = os.environ['TEST_EMAIL']
             subject = subject + " in prod sends to " + account.email
+        if(not invoice.billed):
+            account.balance = account.balance + invoice.total_price
+            account.save()
         name = account.f_name
         prev = date.today().replace(day=1) - timedelta(days=1)
         month = getMonth(self, prev.month)
@@ -79,6 +82,9 @@ class EmailAllInvoices(APIView):
             name = account.f_name
             prev = date.today().replace(day=1) - timedelta(days=1)
             month = getMonth(self, prev.month)
+            if(not invoice.billed):
+                account.balance = account.balance + invoice.total_price
+                account.save()
             print(receiver_email)
             generateEmail(self, receiver_email, name, month,  subject, template.body, invoice.invoice_name)
             invoice.billed = True

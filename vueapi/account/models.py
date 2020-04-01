@@ -13,6 +13,7 @@ class Account(models.Model):
     state = models.CharField(max_length=2)
     phone_no = models.CharField(max_length=20, blank=True)
     email = models.EmailField(max_length=255, blank=True)
+    balance = models.DecimalField( max_digits=6, decimal_places=2, null=True, default=0)
     auto_invoice = models.BooleanField()
     date_created = models.DateTimeField(auto_now_add=True, blank=True)
     date_updated = models.DateTimeField(auto_now=True, blank=True)
