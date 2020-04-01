@@ -33,6 +33,7 @@ REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': (
         'rest_framework.authentication.SessionAuthentication',
         'rest_framework_simplejwt.authentication.JWTAuthentication',
+        'rest_framework.authentication.TokenAuthentication',
     )
 }
 JWT_AUTH = {
@@ -49,11 +50,14 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    "django_apscheduler",
+    "rest_framework.authtoken",
     'account',
     'rest_framework',
     'corsheaders',
     'storages',
 ]
+APSCHEDULER_DATETIME_FORMAT =  "N j, Y, f:s a"  # Default
 
 MIDDLEWARE = [
     'corsheaders.middleware.CorsMiddleware',
